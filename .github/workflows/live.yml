@@ -1,0 +1,23 @@
+name: Pump Fun Live Stream
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */5 * * *'
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FFmpeg & WHIP tools
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg curl
+
+      - name: Start Live Stream to Pump.fun
+        run: |
+          echo "📥 Google Drive theke video download hocche..."
+          curl -L 'https://drive.google.com/uc?export=download&id=1IhzU5n2IM-7DLUTmK9atexcCQXGHw3eW' -o live.mp4
+
+          echo "🚀 Pump.fun-e Live Stream shuru hocche..."
+          timeout 18000 ffmpeg -re -stream_loop -1 -i live.mp4 \
+          -c:v libx264 -preset veryfast -b:v 2500k -maxrate 2500k -bufsize 5000k \
+          -pix_fmt yuv420p -g 60 -c:a aac -b:a 128k -f whip "https://pump-prod-tg2x8veh.whip.livekit.cloud/w?access_token=TfUBDWNkKUon" || true
